@@ -27,11 +27,16 @@ Follow these quick steps to launch the app on your local machine:
 ### 1. Activate Your Environment
 Open your terminal inside the project folder and activate your virtual environment:
 ```bash
-.venv\Scripts\activate '''
+.venv\Scripts\activate 
+``` 
 
-###2. To stop the camera directly in the WebApp
+---
 
--->You can click the ⏹️ Stop Webcam button inside the web app's sidebar to safely halt the video stream.
 
----> Alternatively, you can use Ctrl + C directly in your terminal window to kill the background server entirely.
+
+#### 2. To stop the camera directly in the WebApp
+
+* ** You can click the ⏹️ Stop Webcam button inside the web app's sidebar to safely halt the video stream.
+
+* **Alternatively, you can use Ctrl + C directly in your terminal window to kill the background server entirely.
 
