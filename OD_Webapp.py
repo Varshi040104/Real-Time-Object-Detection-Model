@@ -51,9 +51,26 @@ def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
     # Return the processed frame back to the browser interface
     return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
 
-# 4. WebRTC Streamer setup (handles the live browser feed securely)
+# 4. WebRTC Streamer setup (Enhanced STUN servers for robust fallback connectivity)
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    {
+        "iceServers": [
+            {"urls": ["stun:stun.l.google.com:19302"]},
+            {"urls": ["stun:stun1.l.google.com:19302"]},
+            {"urls": ["stun:stun2.l.google.com:19302"]},
+            {"urls": ["stun:stun3.l.google.com:19302"]},
+            {"urls": ["stun:stun4.l.google.com:19302"]}
+        ]
+    }
+)
+
+webrtc_streamer(
+    key="yolov8-detection",
+    mode=WebRtcMode.SENDRECV,
+    rtc_configuration=RTC_CONFIGURATION,
+    video_frame_callback=video_frame_callback,
+    media_stream_constraints={"video": True, "audio": False},
+    async_processing=True,
 )
 
 webrtc_streamer(
