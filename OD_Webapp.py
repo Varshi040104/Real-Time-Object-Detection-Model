@@ -4,7 +4,7 @@ from ultralytics import YOLO
 import cv2
 import av
 
-# Set page layout
+# Set page layout to wide
 st.set_page_config(page_title="Real-Time YOLOv8 Detector", layout="wide")
 st.title("🎯 Real-Time Object Detection WebApp")
 st.write("An elegant dashboard powered by Ultralytics YOLOv8 and Streamlit.")
@@ -27,31 +27,27 @@ conf_threshold = st.sidebar.slider(
     step=0.05
 )
 
-# 2. Load the YOLOv8 Model (Cached so it doesn't reload constantly)
-@st.cache_resource
-def load_model(model_name):
-    return YOLO(model_name)
+# 2. Load the YOLOv8 Model Safely (Using session state to avoid reload errors)
+if "yolo_model" not in st.session_state or st.session_state.get("current_model_size") != model_size:
+    with st.spinner(f"Loading {model_size} model... Please wait."):
+        st.session_state["yolo_model"] = YOLO(model_size)
+        st.session_state["current_model_size"] = model_size
 
-try:
-    model = load_model(model_size)
-except Exception as e:
-    st.error(f"Error loading model: {e}")
+model = st.session_state["yolo_model"]
 
 # 3. Video Frame Processing Callback Function
 def video_frame_callback(frame: av.VideoFrame) -> av.VideoFrame:
-    # Convert image frame to OpenCV standard format (BGR)
     img = frame.to_ndarray(format="bgr24")
     
-    # Run YOLOv8 inference on the frame using the slider's confidence value
+    # Run YOLOv8 inference
     results = model.predict(img, conf=conf_threshold, verbose=False)
     
-    # Extract the image with drawn bounding boxes overlaid on top
+    # Render bounding boxes onto the frame image
     annotated_img = results[0].plot()
     
-    # Return the processed frame back to the browser interface
     return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
 
-# 4. WebRTC Streamer setup (Enhanced STUN servers for robust fallback connectivity)
+# 4. Secure WebRTC Streamer Setup with Enhanced Fallback STUN Configurations
 RTC_CONFIGURATION = RTCConfiguration(
     {
         "iceServers": [
@@ -64,17 +60,12 @@ RTC_CONFIGURATION = RTCConfiguration(
     }
 )
 
-webrtc_streamer(
-    key="yolov8-detection",
-    mode=WebRtcMode.SENDRECV,
-    rtc_configuration=RTC_CONFIGURATION,
-    video_frame_callback=video_frame_callback,
-    media_stream_constraints={"video": True, "audio": False},
-    async_processing=True,
-)
+# Render the WebRTC layout interface cleanly
+st.subheader("📺 Live Feed Window")
+st.caption("Click 'START' below to initialize your browser's webcam stream with real-time AI bounding boxes.")
 
 webrtc_streamer(
-    key="yolov8-detection",
+    key="yolov8-live-detection-dashboard-v2", # Altered key to break older cache conflicts
     mode=WebRtcMode.SENDRECV,
     rtc_configuration=RTC_CONFIGURATION,
     video_frame_callback=video_frame_callback,
