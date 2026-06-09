@@ -3,6 +3,12 @@ from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from ultralytics import YOLO
 import cv2
 import av
+import asyncio
+import sys
+
+# 🔥 FIX: Prevent "RuntimeError: Event loop is closed" on Windows
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Set page layout to wide
 st.set_page_config(page_title="Real-Time YOLOv8 Detector", layout="wide")
