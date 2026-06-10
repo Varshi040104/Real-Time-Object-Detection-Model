@@ -1,3 +1,10 @@
+import sys
+import os
+
+# Force headless flags before loading heavy vision modules
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
+
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from ultralytics import YOLO
